@@ -1,0 +1,37 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Repository {
+  id            String   @id @default(cuid())
+  owner         String
+  name          String
+  fullName      String   @unique
+  description   String?
+  defaultBranch String   @default("main")
+  isPrivate     Boolean  @default(false)
+  url           String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  reports       Report[]
+}
+
+model Report {
+  id           String     @id @default(cuid())
+  repositoryId String
+  repository   Repository @relation(fields: [repositoryId], references: [id], onDelete: Cascade)
+  weekLabel    String     // "Week 39"
+  period       String     // "Sep 28 - Oct 4"
+  fromDate     DateTime
+  toDate       DateTime
+  tone         String     @default("human")
+  patchNotes   String     // Generated text
+  rawCommits   String     // JSON blob
+  stats        String     // JSON blob
+  createdAt    DateTime   @default(now())
+}
