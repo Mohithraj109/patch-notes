@@ -1,0 +1,14 @@
+services:
+  web:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - GITHUB_TOKEN=${GITHUB_TOKEN}
+      - DATABASE_URL=file:./dev.db
+    volumes:
+      # Persist SQLite database outside the container lifecycle
+      - ./dev.db:/app/dev.db
+    restart: always

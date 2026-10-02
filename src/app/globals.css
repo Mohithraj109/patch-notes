@@ -1,26 +1,97 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --lime: #c8f135;
+  --lime-dim: #a4c82a;
+  --bg: #0a0a0a;
+  --bg-card: #111111;
+  --bg-hover: #181818;
+  --border: #2a2a2a;
+  --border-bright: #3a3a3a;
+  --text: #e8e8e8;
+  --text-muted: #888888;
+  --text-dim: #555555;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+@theme {
+  --color-lime: #c8f135;
+  --color-lime-dim: #a4c82a;
+  --font-mono: 'GeistMono', 'Courier New', monospace;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--bg);
+  color: var(--text);
+  font-family: 'GeistMono', 'Courier New', monospace;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-bright);
+  border-radius: 2px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-dim);
+}
+
+/* Textarea */
+textarea {
+  resize: vertical;
+}
+
+/* Selection */
+::selection {
+  background: var(--lime);
+  color: #000;
+}
+
+/* Streaming text animation */
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+.cursor-blink::after {
+  content: '▋';
+  display: inline-block;
+  color: var(--lime);
+  animation: blink 1s step-start infinite;
+  margin-left: 2px;
+}
+
+/* Impact bar */
+.impact-bar {
+  display: inline-flex;
+  gap: 2px;
+}
+.impact-bar-block {
+  width: 12px;
+  height: 10px;
+  border-radius: 1px;
+}
+
+/* Utility overrides */
+.font-mono {
+  font-family: 'GeistMono', 'Courier New', monospace !important;
+}
+
+/* Patch notes output prose */
+.patch-notes-output {
+  white-space: pre-wrap;
+  line-height: 1.7;
+  font-size: 0.875rem;
 }

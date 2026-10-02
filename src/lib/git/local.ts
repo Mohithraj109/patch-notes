@@ -1,4 +1,4 @@
-import simpleGit from 'simple-git';
+import { simpleGit } from 'simple-git';
 import type { Commit, DateRange } from './types';
 
 export async function fetchCommitsFromLocal(
@@ -8,52 +8,51 @@ export async function fetchCommitsFromLocal(
 ): Promise<Commit[]> {
   const git = simpleGit(repoPath);
 
-  const log = await git.log({
-    from: range.from.toISOString(),
-    to: range.to.toISOString(),
-    '--': true,
-    ...(branch ? { [branch]: null } : {}),
-  });
+  const logArgs: string[] = [
+    `--after=${range.from.toISOString()}`,
+    `--before=${range.to.toISOString()}`,
+    '--format=%H|%s|%an|%ae|%aI',
+  ];
+
+  if (branch) logArgs.push(branch);
+
+  const rawLog = await git.raw(['log', ...logArgs]);
+  const lines = rawLog.trim().split('\n').filter(Boolean);
 
   const commits: Commit[] = await Promise.all(
-    log.all.map(async (c) => {
+    lines.map(async (line: string) => {
+      const [hash, message, author, email, date] = line.split('|');
+
       let filesChanged: string[] = [];
       let additions = 0;
       let deletions = 0;
       let diff = '';
 
       try {
-        const rawDiff = await git.show([
-          '--stat',
-          '--format=',
-          c.hash,
-        ]);
-        // Parse stat lines
-        const lines = rawDiff.split('\n').filter(Boolean);
-        filesChanged = lines
-          .filter((l) => l.includes('|'))
-          .map((l) => l.split('|')[0].trim());
+        const rawDiff = await git.show(['--stat', '--format=', hash]);
+        filesChanged = rawDiff
+          .split('\n')
+          .filter((l: string) => l.includes('|'))
+          .map((l: string) => l.split('|')[0].trim());
 
-        // Get actual diff (truncated)
-        const patchDiff = await git.show(['--patch', '--format=', c.hash]);
+        const patchDiff = await git.show(['--patch', '--format=', hash]);
         diff = patchDiff.slice(0, 3000);
 
-        // Count +/-
-        for (const line of patchDiff.split('\n')) {
-          if (line.startsWith('+') && !line.startsWith('+++')) additions++;
-          if (line.startsWith('-') && !line.startsWith('---')) deletions++;
+        for (const l of patchDiff.split('\n')) {
+          if (l.startsWith('+') && !l.startsWith('+++')) additions++;
+          if (l.startsWith('-') && !l.startsWith('---')) deletions++;
         }
       } catch {
-        // ignore
+        // ignore diff errors
       }
 
       return {
-        hash: c.hash,
-        shortHash: c.hash.slice(0, 7),
-        message: c.message,
-        author: c.author_name,
-        email: c.author_email,
-        timestamp: new Date(c.date),
+        hash: hash.trim(),
+        shortHash: hash.trim().slice(0, 7),
+        message: message.trim(),
+        author: author.trim(),
+        email: email.trim(),
+        timestamp: new Date(date.trim()),
         filesChanged,
         additions,
         deletions,

@@ -39,3 +39,16 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# SQLite database
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+
+# Prisma generated client (auto-generated, don't commit)
+node_modules/.prisma/
+
+# Environment secrets
+.env.local
+.env.*.local

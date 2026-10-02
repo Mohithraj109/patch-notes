@@ -25,13 +25,15 @@ model Report {
   id           String     @id @default(cuid())
   repositoryId String
   repository   Repository @relation(fields: [repositoryId], references: [id], onDelete: Cascade)
-  weekLabel    String     // "Week 39"
-  period       String     // "Sep 28 - Oct 4"
+  weekLabel    String
+  period       String
   fromDate     DateTime
   toDate       DateTime
   tone         String     @default("human")
-  patchNotes   String     // Generated text
-  rawCommits   String     // JSON blob
-  stats        String     // JSON blob
+  patchNotes   String
+  rawCommits   String
+  stats        String
   createdAt    DateTime   @default(now())
+
+  @@index([repositoryId])
 }
